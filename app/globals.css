@@ -1,26 +1,39 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.pulse-scale {
+  animation: pulseScale 3s ease-in-out infinite;
+  display: inline-flex;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes pulseScale {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* style pour la couleur du header */
+/* Dans globals.css */
+.header-text-color {
+  transition: color 0.3s ease;
+}
+
+/* Quand le header est scrolled */
+.scrolled .header-text-color {
+  color: #000 !important; /* Noir */
+}
+
+/* Quand le header n'est pas scrolled */
+:not(.scrolled) .header-text-color {
+  color: #fff !important; /* Blanc */
 }
