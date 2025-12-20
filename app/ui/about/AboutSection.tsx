@@ -69,7 +69,7 @@ const AboutSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="about" className="py-24 bg-gradient-to-b from-stone-50 to-amber-50/30 overflow-hidden relative">
+    <section id="about" className="py-08 bg-gradient-to-b from-stone-50 to-amber-50/30 overflow-hidden relative">
       {/* Texture bois subtile en arrière-plan */}
       <div
         className="absolute inset-0 opacity-5 z-0"

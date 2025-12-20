@@ -31,7 +31,8 @@ export default function HeroSlider() {
       />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+
 
       {/* Content */}
       <div className="relative z-20 hero min-h-screen text-neutral-content">
@@ -60,7 +61,7 @@ export default function HeroSlider() {
         ))}
       </div>
       {/* Gradient to transition to next section */}
-      <div className="absolute bottom-0 left-0 w-full h-15 bg-gradient-to-b from-transparent to-gray-100 z-10" />
+      <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-b from-transparent to-gray-100 z-10" />
     </div>
   );
 }

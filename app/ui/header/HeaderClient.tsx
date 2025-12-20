@@ -1,7 +1,10 @@
 "use client";
 
+import { playfair } from "@/app/lib/font";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import { ReactNode, useEffect, useState } from "react";
+
 
 interface HeaderClientProps {
   children: ReactNode;
@@ -39,7 +42,22 @@ export default function HeaderClient({ children }: HeaderClientProps) {
 
         {/* Header mobile */}
         <div className="flex md:hidden items-center justify-between px-4 py-4">
-          <div className="font-bold text-lg">Logo</div>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/images/logo.jpg"
+              alt="Rolux Logo"
+              width={60}
+              height={50}
+              priority
+              className="rounded-full"
+            />
+            <span className="font-bold text-amber-500 text-4xl transition-colors duration-300">
+              <h2 className={`${playfair.className} italic`}>
+                ROLUX
+              </h2>
+            </span>
+          </div>
+
           <button
             aria-label="Ouvrir le menu"
             onClick={() => setMobileOpen(true)}

@@ -1,0 +1,169 @@
+// app/components/ui/carousel.tsx
+'use client';
+
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+
+const MAX_VISIBILITY = 3;
+
+interface CardProps {
+  id: number;
+  title?: string;
+  content?: string;
+}
+
+interface CarouselProps {
+  cards: CardProps[];
+  autoPlay?: boolean;
+  interval?: number;
+}
+
+// Fonction utilitaire simple pour combiner les classes
+function cn(...classes: (string | boolean | undefined | null)[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+export default function Carousel3D({ cards, autoPlay = false, interval = 3000 }: CarouselProps) {
+  const [active, setActive] = useState(2);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const handlePrevious = useCallback(() => {
+    setActive((prev) => (prev > 0 ? prev - 1 : prev));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setActive((prev) => (prev < cards.length - 1 ? prev + 1 : prev));
+  }, [cards.length]);
+
+  // Auto-play
+  useEffect(() => {
+    if (!autoPlay || isPaused) return;
+
+    const timer = setInterval(handleNext, interval);
+    return () => clearInterval(timer);
+  }, [autoPlay, handleNext, interval, isPaused]);
+
+  // Navigation clavier
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') handlePrevious();
+      if (e.key === 'ArrowRight') handleNext();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrevious, handleNext]);
+
+  return (
+    <div className="w-full max-w-6xl mx-auto px-4">
+      <div
+        className="relative w-full h-[500px] md:h-[600px]"
+        style={{ perspective: '1000px' }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Boutons de navigation */}
+        <button
+          onClick={handlePrevious}
+          disabled={active === 0}
+          className={cn(
+            "absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 z-30",
+            "p-3 rounded-full bg-white/10 border border-white/20",
+            "text-white hover:bg-white/20 transition-all duration-300",
+            active === 0 ? "opacity-30 cursor-not-allowed" : "",
+            "focus:outline-none focus:ring-2 focus:ring-white/50"
+          )}
+          aria-label="Carte précédente"
+          style={{ backdropFilter: 'blur(8px)' }}
+        >
+          <ChevronLeft className="w-8 h-8" />
+        </button>
+
+        <button
+          onClick={handleNext}
+          disabled={active === cards.length - 1}
+          className={cn(
+            "absolute right-0 top-1/2 translate-x-full -translate-y-1/2 z-30",
+            "p-3 rounded-full bg-white/10 border border-white/20",
+            "text-white hover:bg-white/20 transition-all duration-300",
+            active === cards.length - 1 ? "opacity-30 cursor-not-allowed" : "",
+            "focus:outline-none focus:ring-2 focus:ring-white/50"
+          )}
+          aria-label="Carte suivante"
+          style={{ backdropFilter: 'blur(8px)' }}
+        >
+          <ChevronRight className="w-8 h-8" />
+        </button>
+
+        {/* Indicateurs */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+          {cards.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActive(index)}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                index === active ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"
+              )}
+              aria-label={`Aller à la carte ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Conteneur des cartes */}
+        <div className="relative w-full h-full">
+          {cards.map((card, index) => {
+            const offset = active - index;
+            const absOffset = Math.abs(offset);
+            const direction = Math.sign(offset);
+            const isActive = index === active;
+
+            return (
+              <div
+                key={card.id}
+                className="absolute inset-0 w-full h-full transition-all duration-500 ease-out"
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transform: `
+                    rotateY(${offset * 25}deg)
+                    scale(${1 - absOffset * 0.2})
+                    translateZ(${absOffset * -200}px)
+                    translateX(${direction * -100}px)
+                  `,
+                  opacity: absOffset > MAX_VISIBILITY ? 0 : 1 - absOffset * 0.3,
+                  filter: `blur(${absOffset * 8}px)`,
+                  zIndex: cards.length - absOffset,
+                  pointerEvents: isActive ? 'auto' : 'none',
+                }}
+              >
+                <div className={cn(
+                  "w-full h-full p-8 rounded-2xl shadow-2xl",
+                  "bg-gradient-to-br from-white/95 to-gray-50/95",
+                  "border border-white/20",
+                  "transition-all duration-500",
+                  isActive && "shadow-white/20"
+                )}
+                  style={{ backdropFilter: 'blur(8px)' }}
+                >
+                  <div className="h-full flex flex-col justify-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 text-center">
+                      {card.title}
+                    </h2>
+                    <p className="text-gray-700 text-lg md:text-xl leading-relaxed text-justify">
+                      {card.content}
+                    </p>
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      <span className="text-sm font-medium text-gray-500">
+                        {index + 1} / {cards.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

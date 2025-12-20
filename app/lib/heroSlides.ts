@@ -2,34 +2,34 @@
 export const heroSlides = [
   {
     id: 1,
-    title: "Hello there",
+    title: "L’élégance qui s’invite à table",
     description:
-      "Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda.",
+      "Transformez chaque repas en une expérience raffinée grâce à une salle à manger luxueuse, moderne et intemporelle.",
     image: "/images/Hero/slide1.jpg",
-    cta: "Get Started",
+    cta: "Découvrir la collection",
   },
   {
     id: 2,
-    title: "Build Faster",
+    title: "Le salon qui impose le prestige",
     description:
-      "In deleniti eaque aut repudiandae et a id nisi.",
+      "Un espace de vie complet, pensé pour le confort, le style et la technologie. Le luxe commence dès votre salon.",
     image: "/images/Hero/slide2.png",
-    cta: "Learn More",
+    cta: "Voir les modèles",
   },
   {
     id: 3,
-    title: "Hello there",
+    title: "La cuisine où naissent les chefs-d’œuvre",
     description:
-      "Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda.",
+      "Marbre, lignes épurées et finitions haut de gamme pour une cuisine moderne qui sublime votre quotidien.",
     image: "/images/Hero/slide3.png",
-    cta: "Get Started",
+    cta: "Explorer les cuisines",
   },
   {
     id: 4,
-    title: "Build Faster",
+    title: "Votre moment de bien-être, réinventé",
     description:
-      "In deleniti eaque aut repudiandae et a id nisi.",
+      "Douches modernes, rangements intelligents et revêtements élégants pour un espace détente à la hauteur de vos exigences.",
     image: "/images/Hero/slide4.png",
-    cta: "Learn More",
+    cta: "Créer ma salle de bain",
   },
 ];

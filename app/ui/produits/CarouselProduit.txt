@@ -1,0 +1,74 @@
+import React, {useState} from "https://esm.sh/react@18";
+import ReactDOm from "https://esm.sh/react-dom@18";
+
+import {
+  TiChevronLeftOutline,
+  TiChevronRightOutline,
+} from "https://cdn.skypack.dev/react-icons/ti";
+
+
+const CARD = 50;
+const MAX_VISIBILITY = 3;
+
+const Card = ({ title, content })=> (
+  <div className = "card">
+    <h2>
+      {title}
+    </h2>
+    <p>{content}</p>
+  </div>
+)
+
+const Carousel = ({ children }) => {
+  const [active, setActive] = useState(2);
+  const count = React.Children.count(children);
+
+  return (
+    <div className= "carousel">
+      {active >0 && (
+        <button className = "nav left" onClick = {()=>
+        setActive((i) =>i-1)}>
+        <TiChevronLeftOutline/>
+        </button>
+      )}
+      {React.Children.map(children, (chils, i)=>(
+        <div 
+        className = "card-container"
+        style = {{
+          "--active": i === active? 1:0,
+          "--offset": (active - i)/3,
+          "--direction": Math.sign(active - i),
+          "--abs-offset": Math.abs(active - i)/3,
+          "pointer-events": active === 1? "auto":"none",
+          opacity: Math.abs(active - i)> MAX_VISIBILITY ? "none" : "block",
+        }}
+        >
+          {child}
+        </div>
+      ))}
+
+      {active < count - 1 && (
+          <button className = "nav left" onClick = {()=>
+        setActive((i) =>i+1)}>
+        <TiChevronRightOutline/>
+        </button>
+      )}
+    </div>
+  )
+};
+
+const App = () =(
+  <div className = "app">
+    <carousel>
+      {[...new Array(CARD)].map((_, i) =>(
+        <Card 
+        title = {"Card" + (i+1)}
+        content = "Le bois n&apos;est pas seulement un matériau, c&apos;est un partenaire. Il a une histoire, une personnalité, une âme. Notre travail est de révéler cette beauté."
+        >
+      ))}
+    </carousel>
+  </div>
+);
+
+ReactDOM.Render(<App/>, document.body);
+
