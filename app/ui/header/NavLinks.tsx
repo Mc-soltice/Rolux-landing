@@ -47,14 +47,6 @@ export default function NavLinks() {
           `}
         >
           {/* Icône avec animation */}
-          <span className="
-            transition-transform duration-300
-            group-hover:scale-110
-            group-hover:rotate-12
-          ">
-            {link.icon}
-          </span>
-
           {/* Texte */}
           <span>{link.name}</span>
 

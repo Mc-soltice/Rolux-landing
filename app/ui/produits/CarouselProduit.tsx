@@ -196,8 +196,8 @@ export default function CarouselProduct({
   };
 
   // Calcul des indices pour le défilement infini avec reflets
-  const getVisibleIndices = useCallback(() => {
-    const indices = [];
+  const getVisibleIndices = useCallback((): Array<{ index: number; type: string; distance: number }> => {
+    const indices: Array<{ index: number; type: string; distance: number }> = [];
     const maxReflections = 4; // Nombre de reflets de chaque côté
 
     if (validImageCount === 0) return indices;
