@@ -1,9 +1,9 @@
 // app/components/ui/image-carousel.tsx
-'use client';
+"use client";
 
-import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
-import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface CarouselProductProps {
   autoPlay?: boolean;
@@ -16,26 +16,45 @@ interface CarouselProductProps {
 }
 
 // Liste des extensions d'image supportées
-const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.bmp', '.tiff', '.svg'];
+const IMAGE_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".avif",
+  ".gif",
+  ".bmp",
+  ".tiff",
+  ".svg",
+];
+
+interface BokehDot {
+  width: string;
+  height: string;
+  top: string;
+  left: string;
+  animationDuration: string;
+  animationDelay: string;
+}
 
 // Fonction utilitaire pour combiner les classes
 function cn(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 // Génère les chemins des images avec toutes les extensions possibles
 function generateImagePaths(
   count: number = 50,
-  prefix: string = 'produit-'
+  prefix: string = "produit-",
 ): Array<{ path: string; ext: string }>[] {
   return Array.from({ length: count }, (_, i) => {
-    const number = String(i + 1).padStart(2, '0');
+    const number = String(i + 1).padStart(2, "0");
     const basePath = `/produits/${prefix}${number}`;
 
     // Retourne un tableau de tous les chemins possibles avec différentes extensions
-    return IMAGE_EXTENSIONS.map(ext => ({
+    return IMAGE_EXTENSIONS.map((ext) => ({
       path: `${basePath}${ext}`,
-      ext: ext.replace('.', '')
+      ext: ext.replace(".", ""),
     }));
   });
 }
@@ -46,14 +65,26 @@ export default function CarouselProduct({
   showControls = true,
   showIndicators = true,
   imageCount = 50,
-  imagePrefix = 'produit-',
+  imagePrefix = "produit-",
   infiniteScroll = true,
 }: CarouselProductProps) {
-
   // Chemins des images avec toutes les extensions possibles
-  const imageVariants = useMemo(() =>
-    generateImagePaths(imageCount, imagePrefix),
-    [imageCount, imagePrefix]
+  const imageVariants = useMemo(
+    () => generateImagePaths(imageCount, imagePrefix),
+    [imageCount, imagePrefix],
+  );
+
+  const bokehDots = useMemo<BokehDot[]>(
+    () =>
+      Array.from({ length: 8 }, () => ({
+        width: `${Math.random() * 100 + 50}px`,
+        height: `${Math.random() * 100 + 50}px`,
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        animationDuration: `${Math.random() * 10 + 5}s`,
+        animationDelay: `${Math.random() * 5}s`,
+      })),
+    [],
   );
 
   // États pour les images détectées
@@ -63,7 +94,9 @@ export default function CarouselProduct({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
-  const [availableImages, setAvailableImages] = useState<Map<number, string>>(new Map());
+  const [availableImages, setAvailableImages] = useState<Map<number, string>>(
+    new Map(),
+  );
 
   // Référence pour l'intervalle d'auto-play
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,13 +115,13 @@ export default function CarouselProduct({
 
         for (const variant of imageVariants[i]) {
           try {
-            const res = await fetch(variant.path, { method: 'HEAD' });
+            const res = await fetch(variant.path, { method: "HEAD" });
             if (res.ok) {
               available.set(i, variant.path);
               found = true;
               break;
             }
-          } catch { }
+          } catch {}
         }
 
         if (!found) errors.add(i);
@@ -103,17 +136,19 @@ export default function CarouselProduct({
     checkImages();
   }, [imageVariants]);
 
+  const getImagePath = useCallback(
+    (index: number): string => {
+      // Retourne le chemin de l'image si disponible, sinon un placeholder
+      if (availableImages.has(index)) {
+        return availableImages.get(index)!;
+      }
 
-  const getImagePath = useCallback((index: number): string => {
-    // Retourne le chemin de l'image si disponible, sinon un placeholder
-    if (availableImages.has(index)) {
-      return availableImages.get(index)!;
-    }
-
-    // Fallback : construit le chemin avec .jpg par défaut
-    const number = String(index + 1).padStart(2, '0');
-    return `/produits/${imagePrefix}${number}.jpg`;
-  }, [availableImages, imagePrefix]);
+      // Fallback : construit le chemin avec .jpg par défaut
+      const number = String(index + 1).padStart(2, "0");
+      return `/produits/${imagePrefix}${number}.jpg`;
+    },
+    [availableImages, imagePrefix],
+  );
 
   const handlePrevious = useCallback(() => {
     if (infiniteScroll && validImageCount > 0) {
@@ -156,17 +191,17 @@ export default function CarouselProduct({
   // Navigation clavier
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') handlePrevious();
-      if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'Escape') setSelectedImage(null);
-      if (e.key === ' ') {
+      if (e.key === "ArrowLeft") handlePrevious();
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "Escape") setSelectedImage(null);
+      if (e.key === " ") {
         e.preventDefault();
-        setIsPaused(prev => !prev);
+        setIsPaused((prev) => !prev);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevious, handleNext]);
 
   const openLightbox = (index: number) => {
@@ -175,18 +210,20 @@ export default function CarouselProduct({
   };
 
   const handleImageError = (index: number) => {
-    setImageErrors(prev => new Set(prev).add(index));
+    setImageErrors((prev) => new Set(prev).add(index));
 
     // Essayer la variante suivante si disponible
     const currentPath = getImagePath(index);
     const variants = imageVariants[index];
 
     if (variants && variants.length > 1) {
-      const currentExt = currentPath.split('.').pop();
-      const nextVariant = variants.find(v => !v.path.includes(currentExt || ''));
+      const currentExt = currentPath.split(".").pop();
+      const nextVariant = variants.find(
+        (v) => !v.path.includes(currentExt || ""),
+      );
 
       if (nextVariant) {
-        setAvailableImages(prev => {
+        setAvailableImages((prev) => {
           const newMap = new Map(prev);
           newMap.set(index, nextVariant.path);
           return newMap;
@@ -196,8 +233,13 @@ export default function CarouselProduct({
   };
 
   // Calcul des indices pour le défilement infini avec reflets
-  const getVisibleIndices = useCallback((): Array<{ index: number; type: string; distance: number }> => {
-    const indices: Array<{ index: number; type: string; distance: number }> = [];
+  const getVisibleIndices = useCallback((): Array<{
+    index: number;
+    type: string;
+    distance: number;
+  }> => {
+    const indices: Array<{ index: number; type: string; distance: number }> =
+      [];
     const maxReflections = 4; // Nombre de reflets de chaque côté
 
     if (validImageCount === 0) return indices;
@@ -207,7 +249,7 @@ export default function CarouselProduct({
       const index = (active - i + validImageCount) % validImageCount;
       indices.unshift({
         index,
-        type: 'reflection-left',
+        type: "reflection-left",
         distance: i,
       });
     }
@@ -215,7 +257,7 @@ export default function CarouselProduct({
     // Ajouter l'image active
     indices.push({
       index: active,
-      type: 'active',
+      type: "active",
       distance: 0,
     });
 
@@ -224,7 +266,7 @@ export default function CarouselProduct({
       const index = (active + i) % validImageCount;
       indices.push({
         index,
-        type: 'reflection-right',
+        type: "reflection-right",
         distance: i,
       });
     }
@@ -257,7 +299,7 @@ export default function CarouselProduct({
   if (loading) {
     return (
       <div className="w-full max-w-6xl mx-auto px-4">
-        <div className="relative w-full h-[70vh] min-h-[500px] flex items-center justify-center">
+        <div className="relative w-full h-[70vh] min-h-125 flex items-center justify-center">
           <div className="text-amber-400 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-4"></div>
             <p>Chargement des images...</p>
@@ -272,7 +314,7 @@ export default function CarouselProduct({
       <div className="w-full max-w-7xl mx-auto px-4">
         {/* Conteneur principal du carrousel */}
         <div
-          className="relative w-full h-[80vh] min-h-[600px] max-h-[900px] overflow-hidden"
+          className="relative w-full h-[80vh] min-h-150 max-h-225 overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -281,15 +323,16 @@ export default function CarouselProduct({
             <div className="relative w-full h-full flex items-center justify-center">
               {/* Réflexions des images passées et futures */}
               {visibleIndices.map((item, idx) => {
-                if (item.type === 'active') return null;
+                if (item.type === "active") return null;
 
                 const imagePath = getImagePath(item.index);
-                const opacity = Math.max(0.1, 0.5 - (item.distance * 0.1));
-                const scale = 1 - (item.distance * 0.15);
+                const opacity = Math.max(0.1, 0.5 - item.distance * 0.1);
+                const scale = 1 - item.distance * 0.15;
                 const blur = item.distance * 4;
-                const translateX = item.type === 'reflection-left'
-                  ? `-${120 + (item.distance * 60)}%`
-                  : `${120 + (item.distance * 60)}%`;
+                const translateX =
+                  item.type === "reflection-left"
+                    ? `-${120 + item.distance * 60}%`
+                    : `${120 + item.distance * 60}%`;
 
                 return (
                   <div
@@ -311,7 +354,7 @@ export default function CarouselProduct({
                         sizes="25vw"
                         priority={item.distance <= 2}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
+                      <div className="absolute inset-0 bg-linear-to-r from-black/60 via-transparent to-black/60" />
                     </div>
                   </div>
                 );
@@ -329,7 +372,7 @@ export default function CarouselProduct({
                   "p-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20",
                   "text-amber-400 hover:text-amber-300 hover:bg-white/20 transition-all duration-300",
                   "shadow-2xl hover:shadow-3xl hover:scale-110",
-                  "group"
+                  "group",
                 )}
                 aria-label="Image précédente"
               >
@@ -343,7 +386,7 @@ export default function CarouselProduct({
                   "p-4 rounded-full bg-white/10 backdrop-blur-lg border border-white/20",
                   "text-amber-400 hover:text-amber-300 hover:bg-white/20 transition-all duration-300",
                   "shadow-2xl hover:shadow-3xl hover:scale-110",
-                  "group"
+                  "group",
                 )}
                 aria-label="Image suivante"
               >
@@ -381,19 +424,21 @@ export default function CarouselProduct({
                   {active + 1} / {validImageCount}
                 </span>
                 <div className="h-4 w-px bg-white/20" />
-                {Array.from({ length: Math.min(7, validImageCount) }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActive(index)}
-                    className={cn(
-                      "w-2 h-2 rounded-full transition-all duration-300",
-                      index === active
-                        ? "bg-amber-400 w-6 scale-125"
-                        : "bg-white/30 hover:bg-white/60 hover:scale-110"
-                    )}
-                    aria-label={`Aller à l'image ${index + 1}`}
-                  />
-                ))}
+                {Array.from({ length: Math.min(7, validImageCount) }).map(
+                  (_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActive(index)}
+                      className={cn(
+                        "w-2 h-2 rounded-full transition-all duration-300",
+                        index === active
+                          ? "bg-amber-400 w-6 scale-125"
+                          : "bg-white/30 hover:bg-white/60 hover:scale-110",
+                      )}
+                      aria-label={`Aller à l'image ${index + 1}`}
+                    />
+                  ),
+                )}
                 {validImageCount > 7 && (
                   <span className="text-amber-400/60 text-xs px-2">
                     +{validImageCount - 7}
@@ -406,12 +451,25 @@ export default function CarouselProduct({
           {/* Message si aucune image */}
           {validImageCount === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-amber-400 z-40">
-              <svg className="w-20 h-20 text-amber-400/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="w-20 h-20 text-amber-400/30 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <p className="text-xl mb-2">Aucune image trouvée</p>
               <p className="text-amber-400/70 text-sm">
-                Placez vos images dans <code className="bg-white/10 px-2 py-1 rounded">public/produits/</code>
+                Placez vos images dans{" "}
+                <code className="bg-white/10 px-2 py-1 rounded">
+                  public/produits/
+                </code>
               </p>
               <p className="text-amber-400/50 text-xs mt-2">
                 Format attendu: produit-01.jpg, produit-02.png, etc.
@@ -440,21 +498,21 @@ export default function CarouselProduct({
                         "group cursor-pointer transform-gpu",
                         isCenter ? "z-30" : "z-20",
                         isActive && "shadow-amber-400/20 border-amber-400/30",
-                        !isActive && "border-white/10"
+                        !isActive && "border-white/10",
                       )}
                       style={{
-                        width: isCenter ? '40%' : '30%',
-                        height: isCenter ? '75%' : '60%',
+                        width: isCenter ? "40%" : "30%",
+                        height: isCenter ? "75%" : "60%",
                         transform: isCenter
-                          ? 'translateX(0) scale(1) rotateY(0deg)'
+                          ? "translateX(0) scale(1) rotateY(0deg)"
                           : isLeft
-                            ? 'translateX(-110%) scale(0.85) rotateY(-15deg)'
-                            : 'translateX(110%) scale(0.85) rotateY(15deg)',
+                            ? "translateX(-110%) scale(0.85) rotateY(-15deg)"
+                            : "translateX(110%) scale(0.85) rotateY(15deg)",
                         opacity: isCenter ? 1 : 0.9,
                         filter: isCenter
-                          ? 'brightness(1.1) drop-shadow(0 25px 25px rgba(0, 0, 0, 0.5))'
-                          : 'brightness(0.8) contrast(0.95) drop-shadow(0 15px 15px rgba(0, 0, 0, 0.3))',
-                        transition: 'all 700ms cubic-bezier(0.4, 0, 0.2, 1)',
+                          ? "brightness(1.1) drop-shadow(0 25px 25px rgba(0, 0, 0, 0.5))"
+                          : "brightness(0.8) contrast(0.95) drop-shadow(0 15px 15px rgba(0, 0, 0, 0.3))",
+                        transition: "all 700ms cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                       onClick={() => !hasError && openLightbox(index)}
                     >
@@ -462,12 +520,23 @@ export default function CarouselProduct({
                         {hasError ? (
                           <div className="w-full h-full flex flex-col items-center justify-center p-8">
                             <div className="text-amber-400/50 mb-4">
-                              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="w-16 h-16 mx-auto"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={1.5}
+                                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                             </div>
                             <p className="text-amber-400/70 text-center text-sm">
-                              Image {String(index + 1).padStart(2, '0')} non chargée
+                              Image {String(index + 1).padStart(2, "0")} non
+                              chargée
                             </p>
                           </div>
                         ) : (
@@ -475,7 +544,7 @@ export default function CarouselProduct({
                             {/* Image principale */}
                             <Image
                               src={imagePath}
-                              alt={`Produit ${String(index + 1).padStart(2, '0')}`}
+                              alt={`Produit ${String(index + 1).padStart(2, "0")}`}
                               fill
                               className="object-cover transition-transform duration-500 group-hover:scale-110"
                               sizes="(max-width: 768px) 40vw, 40vw"
@@ -487,7 +556,7 @@ export default function CarouselProduct({
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
 
                             {/* Effet de brillance */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                             {/* Numéro de l'image
                             <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
@@ -497,12 +566,14 @@ export default function CarouselProduct({
                             </div> */}
 
                             {/* Effet de lumière sur les bords */}
-                            <div className={cn(
-                              "absolute inset-0 border-2 pointer-events-none transition-all duration-500",
-                              isCenter
-                                ? "border-amber-400/30 shadow-[0_0_40px_rgba(251,191,36,0.3)]"
-                                : "border-white/10"
-                            )} />
+                            <div
+                              className={cn(
+                                "absolute inset-0 border-2 pointer-events-none transition-all duration-500",
+                                isCenter
+                                  ? "border-amber-400/30 shadow-[0_0_40px_rgba(251,191,36,0.3)]"
+                                  : "border-white/10",
+                              )}
+                            />
 
                             {/* Bouton zoom */}
                             {isCenter && (
@@ -524,18 +595,13 @@ export default function CarouselProduct({
 
           {/* Effet de bokeh/lumières en arrière-plan */}
           <div className="absolute inset-0 z-0 overflow-hidden">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {bokehDots.map((dot, i) => (
               <div
                 key={i}
                 className="absolute rounded-full bg-amber-400/10 animate-pulse"
                 style={{
-                  width: `${Math.random() * 100 + 50}px`,
-                  height: `${Math.random() * 100 + 50}px`,
-                  top: `${Math.random() * 100}%`,
-                  left: `${Math.random() * 100}%`,
-                  filter: 'blur(40px)',
-                  animationDuration: `${Math.random() * 10 + 5}s`,
-                  animationDelay: `${Math.random() * 5}s`,
+                  ...dot,
+                  filter: "blur(40px)",
                 }}
               />
             ))}
@@ -567,7 +633,8 @@ export default function CarouselProduct({
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePrevious();
-                  const newIndex = active > 0 ? active - 1 : validImageCount - 1;
+                  const newIndex =
+                    active > 0 ? active - 1 : validImageCount - 1;
                   setSelectedImage(getImagePath(newIndex));
                 }}
                 className="absolute left-6 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-300 transition-colors z-50"
@@ -580,7 +647,8 @@ export default function CarouselProduct({
                 onClick={(e) => {
                   e.stopPropagation();
                   handleNext();
-                  const newIndex = active < validImageCount - 1 ? active + 1 : 0;
+                  const newIndex =
+                    active < validImageCount - 1 ? active + 1 : 0;
                   setSelectedImage(getImagePath(newIndex));
                 }}
                 className="absolute right-6 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-300 transition-colors z-50"
